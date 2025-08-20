@@ -104,6 +104,9 @@ import {
   RiwayatTransaksi,
   DetailArtikel,
   DetailTransaksi,
+  Buku,
+  BukuDetail,
+  ShowWeb,
 } from '../pages';
 import {colors} from '../utils';
 import {Icon} from 'react-native-elements';
@@ -121,6 +124,7 @@ const MainApp = () => {
       tabBar={props => <BottomNavigator {...props} />}>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Artikel" component={Artikel} />
+      <Tab.Screen name="Buku" component={Buku} />
       <Tab.Screen name="RiwayatTransaksi" component={RiwayatTransaksi} />
       <Tab.Screen name="Profile" component={Account} />
     </Tab.Navigator>
@@ -129,7 +133,7 @@ const MainApp = () => {
 
 export default function Router() {
   return (
-    <Stack.Navigator initialRouteName="MainApp">
+    <Stack.Navigator initialRouteName="Splash">
       <Stack.Screen
         name="Splash"
         component={Splash}
@@ -157,6 +161,22 @@ export default function Router() {
       <Stack.Screen
         name="ProdukDetail"
         component={ProdukDetail}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="BukuDetail"
+        component={BukuDetail}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="ShowWeb"
+        component={ShowWeb}
         options={{
           headerShown: false,
         }}

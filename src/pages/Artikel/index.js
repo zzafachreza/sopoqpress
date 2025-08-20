@@ -1,6 +1,6 @@
 import {View, Text, ScrollView, Image, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {colors, fonts} from '../../utils';
+import {Color, colors, fonts} from '../../utils';
 import {MyHeader} from '../../components';
 import axios from 'axios';
 import {apiURL, webURL} from '../../utils/localStorage';
@@ -69,29 +69,35 @@ export default function Artikel({navigation}) {
               activeOpacity={0.7}>
               <View
                 style={{
-                  padding: 20,
+                  // padding: 20,
+                  borderWidth: 1,
+                  borderColor: Color.blueGray[300],
                   borderRadius: 20,
-                  backgroundColor: colors.primary,
-                  height: 250,
+                  backgroundColor: colors.white,
+                  // height: 250,
                 }}>
                 <View>
                   <FastImage
                     style={{
                       width: '100%',
-                      height: 150,
+                      height: 180,
                       borderRadius: 10,
                     }}
+                    resizeMode={FastImage.resizeMode.contain}
                     source={{
                       uri: webURL + artikel.foto,
                     }}
                   />
                 </View>
 
-                <View>
+                <View
+                  style={{
+                    padding: 10,
+                  }}>
                   <Text
                     style={{
-                      fontFamily: fonts.primary[500],
-                      color: colors.white,
+                      fontFamily: fonts.secondary[600],
+                      color: colors.primary,
                       textAlign: 'left',
                       fontSize: 13,
                       marginTop: 20,

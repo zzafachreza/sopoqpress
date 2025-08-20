@@ -50,12 +50,18 @@ import RiwayatTransaksi from './RiwayatTransaksi';
 import Artikel from './Artikel';
 import DetailArtikel from './Artikel/detail';
 import DetailTransaksi from './RiwayatTransaksi/detialtransaksi';
+import Buku from './Buku/Buku';
+import BukuDetail from './Buku/BukuDetail';
+import ShowWeb from './Menu/ShowWeb';
 
 // NEW
 
 export {
   Splash,
   Profit,
+  ShowWeb,
+  Buku,
+  BukuDetail,
   Pelanggan,
   PelangganEdit,
   PelangganAdd,
@@ -100,14 +106,10 @@ export {
   DataLaporan,
   BackupRestore,
   Royalti,
-Checkout,
-ProdukDetail,
-RiwayatTransaksi,
-DetailTransaksi,
-Artikel,
-DetailArtikel
-
-
-
-
+  Checkout,
+  ProdukDetail,
+  RiwayatTransaksi,
+  DetailTransaksi,
+  Artikel,
+  DetailArtikel,
 };

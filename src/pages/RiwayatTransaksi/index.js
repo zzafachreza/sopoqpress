@@ -120,7 +120,7 @@ export default function RiwayatTransaksi({navigation}) {
               </Text>
 
               <View style={styles.itemRow}>
-                <Text style={styles.itemName}>{transaction.nama_jasa}</Text>
+                <Text style={styles.itemName}>{transaction.judul}</Text>
                 <Text style={styles.itemPrice}>
                   {transaction.jumlah} × Rp
                   {new Intl.NumberFormat().format(transaction.harga)}

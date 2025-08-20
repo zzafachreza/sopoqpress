@@ -12,11 +12,12 @@ import {MyHeader} from '../../components';
 import {ScrollView} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {apiURL, webURL} from '../../utils/localStorage';
+import {apiURL, MYAPP, webURL} from '../../utils/localStorage';
 import axios from 'axios';
 import RenderHtml from 'react-native-render-html';
-
-export default function ProdukDetail({navigation, route}) {
+import {Alert} from 'react-native';
+import {ToastProvider, useToast} from 'react-native-toast-notifications';
+export default function BukuDetail({navigation, route}) {
   // Get book data from navigation params
   const systemFonts = [fonts.secondary[600], fonts.secondary[600]];
   const {product} = route.params || {
@@ -120,6 +121,8 @@ export default function ProdukDetail({navigation, route}) {
     return stars;
   };
 
+  const toast = useToast();
+
   return (
     <View style={styles.container}>
       <MyHeader title="Detail Buku" onPress={() => navigation.goBack()} />
@@ -146,6 +149,16 @@ export default function ProdukDetail({navigation, route}) {
           <Text style={styles.productPrice}>{formatPrice(product.harga)}</Text>
 
           {/* Rating */}
+
+          <Text style={styles.productName}>{product.tipe}</Text>
+
+          {product.tipe == 'Digital' && (
+            <TouchableOpacity
+              onPress={() => Linking.openURL(product.link_buku)}
+              style={styles.ratingContainer}>
+              <Text style={styles.ratingText}>Download Buku Digital</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Stock Info */}
           <View style={styles.stockContainer}>
@@ -213,23 +226,46 @@ export default function ProdukDetail({navigation, route}) {
 
       {/* Action Buttons */}
       <View style={styles.actionContainer}>
-        <TouchableOpacity style={styles.helpButton} onPress={openWhatsApp}>
-          <Icon name="chatbubble-ellipses" size={20} color={colors.primary} />
-          <Text style={styles.helpButtonText}>Tanya</Text>
+        <TouchableOpacity
+          style={styles.helpButton}
+          onPress={() => {
+            Alert.alert(MYAPP, 'Apakah kamu yakin akan hapus ini ?', [
+              {
+                text: 'TIDAK',
+              },
+              {
+                text: 'Ya, HAPUS',
+                onPress: () => {
+                  axios
+                    .post(apiURL + 'delete', {
+                      modul: 'buku',
+                      id: product.id_buku,
+                    })
+                    .then(res => {
+                      if (res.data.status == 200) {
+                        toast.show(res.data.message, {
+                          type: 'success',
+                        });
+                        navigation.goBack();
+                      }
+                    });
+                },
+              },
+            ]);
+          }}>
+          <Icon name="trash-outline" size={20} color={colors.danger} />
+          <Text style={styles.helpButtonText}>Hapus</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.buyButton,
-            product.status_buku !== 'Tersedia' && styles.disabledButton,
-          ]}
-          onPress={handleBuyNow}
-          disabled={product.status_buku !== 'Tersedia'}>
-          <Text style={styles.buyButtonText}>
-            {product.status_buku === 'Tersedia'
-              ? 'Beli Sekarang'
-              : 'Belum Tersedia'}
-          </Text>
+          style={styles.buyButton}
+          onPress={() =>
+            navigation.replace('ShowWeb', {
+              link: webURL + 'buku/edit2/' + product.id_buku,
+              judul: 'Edit Buku',
+            })
+          }>
+          <Text style={styles.buyButtonText}>Edit </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -415,14 +451,14 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.danger,
     borderRadius: 8,
     marginRight: 10,
   },
   helpButtonText: {
     fontFamily: fonts.secondary[600],
     fontSize: 14,
-    color: colors.primary,
+    color: colors.danger,
     marginLeft: 8,
   },
   buyButton: {

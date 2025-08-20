@@ -1,126 +1,237 @@
-import {View, Text, ScrollView, StyleSheet, Image} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Linking,
+  Alert,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Color, colors, fonts} from '../../utils';
+import {colors, fonts, windowWidth} from '../../utils';
 import {MyHeader} from '../../components';
+import {ScrollView} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {apiURL, webURL} from '../../utils/localStorage';
 import axios from 'axios';
-import {apiURL} from '../../utils/localStorage';
+import RenderHtml from 'react-native-render-html';
 import moment from 'moment';
 
 export default function DetailTransaksi({route, navigation}) {
   // Get transaction data from route params
-  const {transaction} = route.params;
-
-  const [tracking, setTracking] = useState([]);
-
-  // Format date function
-  const formatDate = dateString => {
-    const date = new Date(dateString);
-    return date.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const transaksi = route.params?.transaction || route.params;
+  console.log(transaksi);
 
   const getStatusColor = status => {
     switch (status) {
       case 'Menunggu Konfirmasi':
-        return colors.warning;
-      case 'Sedang Diproses':
-        return colors.primary;
-      case 'Dikirim':
-        return colors.info;
+        return colors.warning || '#FF9800';
+      case 'Sedang Proses':
+        return colors.success || '#2c6df8ff';
+      case 'Sedang Pengiriman':
+        return colors.success || '#634b9bff';
       case 'Selesai':
-        return colors.success;
+        return colors.success || '#4CAF50';
       case 'Batal':
-        return colors.danger;
+        return colors.danger || '#F44336';
       default:
-        return colors.gray;
+        return colors.secondary || '#757575';
     }
   };
 
-  const getStatusIcon = status => {
-    switch (status) {
-      case 'Menunggu Konfirmasi':
-        return 'time-outline';
-      case 'Sedang Diproses':
-        return 'refresh-outline';
-      case 'Dikirim':
-        return 'car-outline';
-      case 'Selesai':
-        return 'checkmark-done-outline';
-      case 'Batal':
-        return 'close-outline';
-      default:
-        return 'help-outline';
-    }
+  const formatCurrency = amount => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
-  useEffect(() => {
-    axios
-      .post(apiURL + 'tracking', {
-        kode: transaction.kode,
-      })
-      .then(res => {
-        console.log(res.data);
-
-        setTracking(res.data);
+  const openProofImage = () => {
+    if (transaksi.bukti_transaksi) {
+      const imageUrl = `${webURL || 'https://your-domain.com/'}${
+        transaksi.bukti_transaksi
+      }`;
+      Linking.openURL(imageUrl).catch(() => {
+        Alert.alert('Error', 'Tidak dapat membuka gambar');
       });
-  }, []);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <MyHeader title="Detail Transaksi" onPress={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Tracking Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Status Transaksi</Text>
-          {tracking.map((item, index) => (
-            <View key={index} style={styles.timelineItem}>
-              <View>
-                <View style={styles.timelineLeft}>
-                  <View
-                    style={[
-                      styles.timelineDot,
-                      {backgroundColor: colors.primary},
-                    ]}>
-                    <Icon name="checkmark" size={16} color={colors.white} />
-                  </View>
-                </View>
-
-                <View style={styles.timelineLeft}>
-                  <View
-                    style={{
-                      width: 2,
-                      backgroundColor: Color.blueGray[400],
-                      height: 100,
-                      // flex: 1
-                    }}>
-                    <Icon name="checkmark" size={16} color={colors.white} />
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.timelineContent}>
-                <Text style={styles.timelineTime}>
-                  {moment(item.tanggal_proses).format('DD MMMM YYYY')}{' '}
-                  {item.jam_proses.toString().substr(0, 5)}
-                </Text>
-                <Text
-                  style={[
-                    styles.timelineStatus,
-                    {color: getStatusColor(item.status)},
-                  ]}>
-                  {item.nama_proses}
-                </Text>
-                <Text style={styles.timelineNote}>{item.informasi_proses}</Text>
-              </View>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Header Info */}
+        <View style={styles.headerCard}>
+          <View style={styles.row}>
+            <Text style={styles.label}>Kode Transaksi</Text>
+            <Text style={styles.value}>{transaksi.kode}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Tanggal</Text>
+            <Text style={styles.value}>
+              {moment(transaksi.tanggal).format('DD MMMM YYYY')}
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Status</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                {backgroundColor: getStatusColor(transaksi.status)},
+              ]}>
+              <Text style={styles.statusText}>{transaksi.status}</Text>
             </View>
-          ))}
+          </View>
+        </View>
+
+        {/* Book Information */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Informasi Buku</Text>
+
+          <View style={styles.bookInfo}>
+            {transaksi.cover && (
+              <FastImage
+                source={{
+                  uri: `${webURL || 'https://your-domain.com/'}${
+                    transaksi.cover
+                  }`,
+                }}
+                style={styles.bookCover}
+                resizeMode={FastImage.resizeMode.cover}
+              />
+            )}
+
+            <View style={styles.bookDetails}>
+              <Text style={styles.bookTitle}>{transaksi.judul}</Text>
+              <Text style={styles.bookAuthor}>
+                Penulis: {transaksi.penulis}
+              </Text>
+              <Text style={styles.bookPublisher}>
+                Penerbit: {transaksi.penerbit}
+              </Text>
+              <Text style={styles.bookCategory}>
+                Kategori: {transaksi.kategori}
+              </Text>
+              <Text style={styles.bookYear}>Tahun: {transaksi.tahun}</Text>
+              <Text style={styles.bookPages}>Halaman: {transaksi.halaman}</Text>
+              <Text style={styles.bookType}>Tipe: {transaksi.tipe}</Text>
+            </View>
+          </View>
+
+          {transaksi.deskripsi && (
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.descriptionTitle}>Deskripsi:</Text>
+              <RenderHtml
+                contentWidth={windowWidth - 60}
+                source={{html: transaksi.deskripsi}}
+                tagsStyles={{
+                  p: {color: colors.text || '#333', fontSize: 14},
+                }}
+              />
+              {transaksi.tipe == 'Digital' && transaksi.status == 'Selesai' && (
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(transaksi.link_buku)}
+                  style={styles.ratingContainer}>
+                  <Text
+                    style={{
+                      ...styles.bookType,
+                      textAlign: 'center',
+                    }}>
+                    Download Buku Digital
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+
+        {/* Transaction Details */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Detail Pembelian</Text>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Harga Satuan</Text>
+            <Text style={styles.value}>{formatCurrency(transaksi.harga)}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Jumlah</Text>
+            <Text style={styles.value}>{transaksi.jumlah} buah</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.row}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>
+              {formatCurrency(transaksi.total)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Customer Information */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Informasi Pembeli</Text>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Nama</Text>
+            <Text style={styles.value}>{transaksi.nama_customer}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Username</Text>
+            <Text style={styles.value}>{transaksi.username}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Telepon</Text>
+            <Text style={styles.value}>{transaksi.telepon_customer}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Alamat</Text>
+            <Text style={styles.value}>{transaksi.alamat_customer}</Text>
+          </View>
+        </View>
+
+        {/* Payment Information */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Informasi Pembayaran</Text>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Metode Pembayaran</Text>
+            <Text style={styles.value}>{transaksi.pembayaran}</Text>
+          </View>
+
+          {transaksi.bukti_transaksi && (
+            <View style={styles.proofContainer}>
+              <Text style={styles.label}>Bukti Transfer</Text>
+              <TouchableOpacity
+                style={styles.proofButton}
+                onPress={openProofImage}>
+                <Icon
+                  name="image-outline"
+                  size={20}
+                  color={colors.primary || '#007AFF'}
+                />
+                <Text style={styles.proofButtonText}>Lihat Bukti Transfer</Text>
+                <Icon
+                  name="open-outline"
+                  size={16}
+                  color={colors.primary || '#007AFF'}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.noteContainer}>
+            <Text style={styles.label}>Catatan</Text>
+            <Text style={styles.noteText}>{transaksi.catatan}</Text>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -130,110 +241,183 @@ export default function DetailTransaksi({route, navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background || '#f5f5f5',
   },
-  scrollContainer: {
-    padding: 20,
-    paddingBottom: 40,
+  content: {
+    flex: 1,
+    padding: 16,
   },
-  section: {
-    marginBottom: 25,
+  headerCard: {
+    backgroundColor: colors.white || '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  sectionTitle: {
-    fontFamily: fonts.primary[700],
+  card: {
+    backgroundColor: colors.white || '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cardTitle: {
     fontSize: 18,
-    color: colors.dark,
-    marginBottom: 15,
+    fontWeight: 'bold',
+    color: colors.text || '#333',
+    marginBottom: 12,
+    fontFamily: fonts?.primary?.[600] || 'System',
   },
-  productInfo: {
-    backgroundColor: colors.background,
-    borderRadius: 10,
-    padding: 15,
-  },
-  productName: {
-    fontFamily: fonts.primary[600],
-    fontSize: 16,
-    color: colors.dark,
-    marginBottom: 10,
-  },
-  priceRow: {
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  priceText: {
-    fontFamily: fonts.primary[400],
-    fontSize: 14,
-    color: colors.dark,
-  },
-  totalText: {
-    fontFamily: fonts.primary[600],
-    fontSize: 16,
-    color: colors.primary,
-  },
-  paymentInfo: {
-    backgroundColor: colors.background,
-    borderRadius: 10,
-    padding: 15,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  infoLabel: {
-    fontFamily: fonts.primary[400],
-    fontSize: 14,
-    color: colors.dark,
-  },
-  infoValue: {
-    fontFamily: fonts.primary[500],
-    fontSize: 14,
-    color: colors.dark,
-  },
-  proofImage: {
-    width: '100%',
-    // height: 200,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-  },
-  timelineLeft: {
-    width: 40,
     alignItems: 'center',
+    marginBottom: 8,
   },
-  timelineDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  timelineLine: {
-    width: 1,
+  label: {
+    fontSize: 14,
+    color: colors.secondary || '#666',
     flex: 1,
-    backgroundColor: colors.black,
+    fontFamily: fonts?.primary?.[400] || 'System',
   },
-  timelineContent: {
+  value: {
+    fontSize: 14,
+    color: colors.text || '#333',
+    fontWeight: '500',
     flex: 1,
-    paddingBottom: 10,
+    textAlign: 'right',
+    fontFamily: fonts?.primary?.[500] || 'System',
   },
-  timelineTime: {
-    fontFamily: fonts.primary[400],
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  statusText: {
+    color: '#fff',
     fontSize: 12,
-    color: colors.gray,
-    // marginBottom: 3,
+    fontWeight: 'bold',
   },
-  timelineStatus: {
-    fontFamily: fonts.primary[600],
+  bookInfo: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  bookCover: {
+    width: 80,
+    height: 100,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  bookDetails: {
+    flex: 1,
+  },
+  bookTitle: {
     fontSize: 16,
-    marginBottom: 5,
+    fontWeight: 'bold',
+    color: colors.text || '#333',
+    marginBottom: 4,
+    fontFamily: fonts?.primary?.[600] || 'System',
   },
-  timelineNote: {
-    fontFamily: fonts.primary[400],
+  bookAuthor: {
     fontSize: 14,
-    color: colors.dark,
-    lineHeight: 20,
+    color: colors.secondary || '#666',
+    marginBottom: 2,
+  },
+  bookPublisher: {
+    fontSize: 14,
+    color: colors.secondary || '#666',
+    marginBottom: 2,
+  },
+  bookCategory: {
+    fontSize: 14,
+    color: colors.secondary || '#666',
+    marginBottom: 2,
+  },
+  bookYear: {
+    fontSize: 14,
+    color: colors.secondary || '#666',
+    marginBottom: 2,
+  },
+  bookPages: {
+    fontSize: 14,
+    color: colors.secondary || '#666',
+    marginBottom: 2,
+  },
+  bookType: {
+    fontSize: 14,
+    color: colors.primary || '#007AFF',
+    fontWeight: '500',
+  },
+  descriptionContainer: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border || '#e0e0e0',
+  },
+  descriptionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: colors.text || '#333',
+    marginBottom: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border || '#e0e0e0',
+    marginVertical: 12,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text || '#333',
+    fontFamily: fonts?.primary?.[600] || 'System',
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.primary || '#007AFF',
+    fontFamily: fonts?.primary?.[600] || 'System',
+  },
+  proofContainer: {
+    marginTop: 12,
+  },
+  proofButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary ? `${colors.primary}10` : '#007AFF10',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  proofButtonText: {
+    fontSize: 14,
+    color: colors.primary || '#007AFF',
+    marginLeft: 8,
+    marginRight: 8,
+    flex: 1,
+    fontWeight: '500',
+  },
+  noteContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border || '#e0e0e0',
+  },
+  noteText: {
+    fontSize: 14,
+    color: colors.text || '#333',
+    fontStyle: 'italic',
+    marginTop: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.background || '#f5f5f5',
+    borderRadius: 8,
   },
 });

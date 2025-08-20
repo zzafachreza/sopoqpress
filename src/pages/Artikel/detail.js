@@ -19,6 +19,7 @@ export default function DetailArtikel({route}) {
             source={{
               uri: webURL + artikel.foto,
             }}
+            resizeMode={FastImage.resizeMode.contain}
             style={{
               width: '100%',
               height: 200,

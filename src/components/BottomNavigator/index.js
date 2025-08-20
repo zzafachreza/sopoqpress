@@ -79,17 +79,20 @@ export default function BottomNavigator({state, descriptors, navigation}) {
           case 'Home':
             iconName = isFocused ? 'home' : 'home-outline';
             break;
-            case 'Artikel':
+          case 'Artikel':
             iconName = isFocused ? 'newspaper' : 'newspaper-outline';
             break;
-            case 'RiwayatTransaksi':
+          case 'RiwayatTransaksi':
             iconName = isFocused ? 'file-tray-full' : 'file-tray-full-outline';
             break;
           case 'Profile':
             iconName = isFocused ? 'person' : 'person-outline';
             break;
+          case 'Buku':
+            iconName = isFocused ? 'book' : 'book-outline';
+            break;
           default:
-            iconName = 'help-circle-outline';
+            iconName = 'book-outline';
             break;
         }
 
@@ -108,8 +111,8 @@ export default function BottomNavigator({state, descriptors, navigation}) {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: 50,
-                borderTopWidth:1,
-                borderTopColor:'white'
+                borderTopWidth: 1,
+                borderTopColor: 'white',
               }}>
               <Icon
                 type="ionicon"

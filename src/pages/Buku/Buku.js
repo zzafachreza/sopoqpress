@@ -13,31 +13,36 @@ import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
 import {useIsFocused} from '@react-navigation/native';
 import axios from 'axios';
-import {apiURL, webURL} from '../../utils/localStorage';
+import {apiURL, getData, webURL} from '../../utils/localStorage';
+import {MyButton} from '../../components';
 
 const {width} = Dimensions.get('window');
 
-export default function Home({navigation}) {
-  const [user] = useState({});
+export default function Buku({navigation}) {
+  const [user, setUser] = useState({});
   const [featuredProducts, setProduct] = useState([]);
 
   const navigateToDetail = product => {
-    navigation.navigate('ProdukDetail', {product});
+    navigation.navigate('BukuDetail', {product});
   };
 
   const getBuku = () => {
-    axios
-      .post(apiURL + 'buku', {
-        modul: 'buku',
-      })
-      .then(res => {
-        console.log(res.data);
-        setProduct(res.data);
-      })
-      .catch(error => {
-        console.log('Error fetching books:', error);
-        // Tetap gunakan data dummy jika API gagal
-      });
+    getData('user').then(u => {
+      setUser(u);
+      axios
+        .post(apiURL + 'listbuku', {
+          modul: 'buku',
+          fid_customer: u.id_customer,
+        })
+        .then(res => {
+          console.log(res.data);
+          setProduct(res.data);
+        })
+        .catch(error => {
+          console.log('Error fetching books:', error);
+          // Tetap gunakan data dummy jika API gagal
+        });
+    });
   };
 
   const formatPrice = price => {
@@ -53,30 +58,12 @@ export default function Home({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={[colors.primary, '#FEFAE0']}
-        style={styles.headerGradient}
-        start={{x: 0, y: 0}}
-        end={{x: 0.9, y: 1}}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greetingText}>SELAMAT DATANG,</Text>
-            <Text style={styles.greetingText}>TOKO BUKU SOPOQ</Text>
-          </View>
-          <FastImage
-            source={require('../../assets/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-      </LinearGradient>
-
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Koleksi Buku</Text>
-          <Text style={styles.sectionSubtitle}>Temukan buku favorit Anda</Text>
+          <Text style={styles.sectionTitle}>Koleksi Buku Saya</Text>
+          <Text style={styles.sectionSubtitle}>Daftar buku saya</Text>
         </View>
 
         <View style={styles.productsGrid}>
@@ -111,6 +98,17 @@ export default function Home({navigation}) {
                       Stok: {product.stok} buku
                     </Text>
                   )}
+
+                  <Text
+                    style={{
+                      ...styles.statusBuku,
+                      color:
+                        product.status_buku == 'Tersedia'
+                          ? colors.success
+                          : colors.warning,
+                    }}>
+                    {product.status_buku}
+                  </Text>
                 </View>
                 <View
                   style={
@@ -125,6 +123,20 @@ export default function Home({navigation}) {
           ))}
         </View>
       </ScrollView>
+      <View
+        style={{
+          padding: 10,
+        }}>
+        <MyButton
+          onPress={() =>
+            navigation.navigate('ShowWeb', {
+              link: webURL + 'buku/add2/' + user.id_customer,
+              judul: 'Upload Buku',
+            })
+          }
+          title="Jual Buku"
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -259,5 +271,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.secondary[600],
     fontSize: 8,
     color: 'white',
+  },
+  statusBuku: {
+    fontFamily: fonts.secondary[600],
+    fontSize: 8,
+    color: colors.warning,
   },
 });
