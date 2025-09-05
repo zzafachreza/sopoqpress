@@ -20,7 +20,7 @@ export const getData = async key => {
 };
 
 // export const apiURL = 'https://sopoq.my.id/api/';
-export const apiURL = 'http://192.168.1.13/sopoqpress/api/';
+export const apiURL = 'http://192.168.1.51/sopoqpress/api/';
 
 export const MYAPP = 'Sopoq Press';
 export const api_token =

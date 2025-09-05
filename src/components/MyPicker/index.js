@@ -24,8 +24,6 @@ export default function MyPicker({
   const [selectedItem, setSelectedItem] = useState(data[0]); // Default selected item
   const [dataList, setDataList] = useState(data);
 
-  console.log(dataList);
-
   useEffect(() => {
     setDataList(data);
   }, []);
@@ -44,11 +42,10 @@ export default function MyPicker({
   const [ket, setKey] = useState({});
 
   const filterPicker = x => {
-    console.log(x);
     let filterd = dataList.filter(
       i => i.label.toLowerCase().indexOf(x.toLowerCase()) > -1,
     );
-    console.log(filterd);
+
     if (x.length == 0) {
       setDataList(data);
     } else if (filterd.length > 0) {

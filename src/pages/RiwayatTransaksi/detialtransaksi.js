@@ -40,6 +40,36 @@ export default function DetailTransaksi({route, navigation}) {
     }
   };
 
+  const getTypeColor = type => {
+    switch (type) {
+      case 'buku':
+        return colors.primary;
+      case 'bundling':
+        return colors.success;
+      case 'mandiri':
+        return colors.warning;
+      case 'kolaborasi':
+        return colors.info;
+      default:
+        return colors.gray;
+    }
+  };
+
+  const getTypeLabel = type => {
+    switch (type) {
+      case 'buku':
+        return 'Pesanan Buku';
+      case 'bundling':
+        return 'Publikasi Paket Bundling';
+      case 'mandiri':
+        return 'Publikasi Paket Mandiri';
+      case 'kolaborasi':
+        return 'Publikasi Paket Kolaborasi';
+      default:
+        return type;
+    }
+  };
+
   const formatCurrency = amount => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -59,6 +89,231 @@ export default function DetailTransaksi({route, navigation}) {
     }
   };
 
+  // Render content based on transaction type
+  const renderTransactionContent = () => {
+    switch (transaksi.type) {
+      case 'buku':
+        return renderBookContent();
+      case 'bundling':
+        return renderBundlingContent();
+      case 'mandiri':
+        return renderMandiriContent();
+      case 'kolaborasi':
+        return renderKolaborasiContent();
+      default:
+        return renderBookContent(); // fallback to book content
+    }
+  };
+
+  const renderBookContent = () => (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>Informasi Buku</Text>
+
+      <View style={styles.bookInfo}>
+        {transaksi.cover && (
+          <FastImage
+            source={{
+              uri: `${webURL || 'https://your-domain.com/'}${transaksi.cover}`,
+            }}
+            style={styles.bookCover}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+        )}
+
+        <View style={styles.bookDetails}>
+          <Text style={styles.bookTitle}>{transaksi.judul}</Text>
+          <Text style={styles.bookAuthor}>Penulis: {transaksi.penulis}</Text>
+          <Text style={styles.bookPublisher}>
+            Penerbit: {transaksi.penerbit}
+          </Text>
+          <Text style={styles.bookCategory}>
+            Kategori: {transaksi.kategori}
+          </Text>
+          <Text style={styles.bookYear}>Tahun: {transaksi.tahun}</Text>
+          <Text style={styles.bookPages}>Halaman: {transaksi.halaman}</Text>
+          <Text style={styles.bookType}>Tipe: {transaksi.tipe}</Text>
+        </View>
+      </View>
+
+      {transaksi.deskripsi && (
+        <View style={styles.descriptionContainer}>
+          <Text style={styles.descriptionTitle}>Deskripsi:</Text>
+          <RenderHtml
+            contentWidth={windowWidth - 60}
+            source={{html: transaksi.deskripsi}}
+            tagsStyles={{
+              p: {color: colors.text || '#333', fontSize: 14},
+            }}
+          />
+          {transaksi.tipe == 'Digital' && transaksi.status == 'Selesai' && (
+            <TouchableOpacity
+              onPress={() => Linking.openURL(transaksi.link_buku)}
+              style={styles.ratingContainer}>
+              <Text
+                style={{
+                  ...styles.bookType,
+                  textAlign: 'center',
+                }}>
+                Download Buku Digital
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+    </View>
+  );
+
+  const renderBundlingContent = () => (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>Informasi Paket Bundling</Text>
+
+      <View style={styles.packageInfo}>
+        <View style={styles.packageIcon}>
+          <Icon
+            name="albums-outline"
+            size={60}
+            color={getTypeColor('bundling')}
+          />
+        </View>
+
+        <View style={styles.packageDetails}>
+          <Text style={styles.packageTitle}>Paket Publikasi Bundling</Text>
+          <Text style={styles.packageDescription}>
+            Paket lengkap untuk publikasi buku dengan berbagai layanan bundling
+          </Text>
+
+          <View style={styles.packageFeature}>
+            <Icon
+              name={
+                transaksi.haki === 'Ya' ? 'checkmark-circle' : 'close-circle'
+              }
+              size={16}
+              color={transaksi.haki === 'Ya' ? colors.success : colors.danger}
+            />
+            <Text style={styles.featureText}>
+              HAKI: {transaksi.haki === 'Ya' ? 'Termasuk' : 'Tidak Termasuk'}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderMandiriContent = () => (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>Informasi Paket Mandiri</Text>
+
+      <View style={styles.packageInfo}>
+        <View style={styles.packageIcon}>
+          <Icon
+            name="person-outline"
+            size={60}
+            color={getTypeColor('mandiri')}
+          />
+        </View>
+
+        <View style={styles.packageDetails}>
+          <Text style={styles.packageTitle}>Paket Publikasi Mandiri</Text>
+          <Text style={styles.packageDescription}>
+            Paket publikasi mandiri untuk penulis yang ingin menerbitkan karya
+            sendiri
+          </Text>
+
+          <View style={styles.packageFeature}>
+            <Icon
+              name={
+                transaksi.haki === 'Ya' ? 'checkmark-circle' : 'close-circle'
+              }
+              size={16}
+              color={transaksi.haki === 'Ya' ? colors.success : colors.danger}
+            />
+            <Text style={styles.featureText}>
+              HAKI: {transaksi.haki === 'Ya' ? 'Termasuk' : 'Tidak Termasuk'}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderKolaborasiContent = () => (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>Informasi Paket Kolaborasi</Text>
+
+      <View style={styles.packageInfo}>
+        <View style={styles.packageIcon}>
+          <Icon
+            name="people-outline"
+            size={60}
+            color={getTypeColor('kolaborasi')}
+          />
+        </View>
+
+        <View style={styles.packageDetails}>
+          <Text style={styles.packageTitle}>Paket Publikasi Kolaborasi</Text>
+          <Text style={styles.packageDescription}>
+            Paket kolaborasi untuk publikasi buku bersama dengan penulis lain
+          </Text>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>{transaksi.nama_judul}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Penulis Ke- {transaksi.penulis}</Text>
+          </View>
+
+          <View style={styles.packageFeature}>
+            <Icon name="checkmark-circle" size={16} color={colors.success} />
+            <Text style={styles.featureText}>Kolaborasi Multi Penulis</Text>
+          </View>
+
+          <View style={styles.packageFeature}>
+            <Icon name="checkmark-circle" size={16} color={colors.success} />
+            <Text style={styles.featureText}>Editing Kolaboratif</Text>
+          </View>
+
+          <View style={styles.packageFeature}>
+            <Icon name="checkmark-circle" size={16} color={colors.success} />
+            <Text style={styles.featureText}>Pembagian Royalti</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderPurchaseDetails = () => (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>Detail Pembelian</Text>
+
+      {transaksi.type === 'buku' ? (
+        <>
+          <View style={styles.row}>
+            <Text style={styles.label}>Harga Satuan</Text>
+            <Text style={styles.value}>{formatCurrency(transaksi.harga)}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Jumlah</Text>
+            <Text style={styles.value}>{transaksi.jumlah} buah</Text>
+          </View>
+        </>
+      ) : (
+        <View style={styles.row}>
+          <Text style={styles.label}>Harga Paket</Text>
+          <Text style={styles.value}>{formatCurrency(transaksi.total)}</Text>
+        </View>
+      )}
+
+      <View style={styles.divider} />
+
+      <View style={styles.row}>
+        <Text style={styles.totalLabel}>Total</Text>
+        <Text style={styles.totalValue}>{formatCurrency(transaksi.total)}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <MyHeader title="Detail Transaksi" onPress={() => navigation.goBack()} />
@@ -70,12 +325,27 @@ export default function DetailTransaksi({route, navigation}) {
             <Text style={styles.label}>Kode Transaksi</Text>
             <Text style={styles.value}>{transaksi.kode}</Text>
           </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Jenis Transaksi</Text>
+            <View
+              style={[
+                styles.typeBadge,
+                {backgroundColor: getTypeColor(transaksi.type)},
+              ]}>
+              <Text style={styles.typeBadgeText}>
+                {getTypeLabel(transaksi.type)}
+              </Text>
+            </View>
+          </View>
+
           <View style={styles.row}>
             <Text style={styles.label}>Tanggal</Text>
             <Text style={styles.value}>
               {moment(transaksi.tanggal).format('DD MMMM YYYY')}
             </Text>
           </View>
+
           <View style={styles.row}>
             <Text style={styles.label}>Status</Text>
             <View
@@ -88,90 +358,11 @@ export default function DetailTransaksi({route, navigation}) {
           </View>
         </View>
 
-        {/* Book Information */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Informasi Buku</Text>
+        {/* Transaction Content Based on Type */}
+        {renderTransactionContent()}
 
-          <View style={styles.bookInfo}>
-            {transaksi.cover && (
-              <FastImage
-                source={{
-                  uri: `${webURL || 'https://your-domain.com/'}${
-                    transaksi.cover
-                  }`,
-                }}
-                style={styles.bookCover}
-                resizeMode={FastImage.resizeMode.cover}
-              />
-            )}
-
-            <View style={styles.bookDetails}>
-              <Text style={styles.bookTitle}>{transaksi.judul}</Text>
-              <Text style={styles.bookAuthor}>
-                Penulis: {transaksi.penulis}
-              </Text>
-              <Text style={styles.bookPublisher}>
-                Penerbit: {transaksi.penerbit}
-              </Text>
-              <Text style={styles.bookCategory}>
-                Kategori: {transaksi.kategori}
-              </Text>
-              <Text style={styles.bookYear}>Tahun: {transaksi.tahun}</Text>
-              <Text style={styles.bookPages}>Halaman: {transaksi.halaman}</Text>
-              <Text style={styles.bookType}>Tipe: {transaksi.tipe}</Text>
-            </View>
-          </View>
-
-          {transaksi.deskripsi && (
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionTitle}>Deskripsi:</Text>
-              <RenderHtml
-                contentWidth={windowWidth - 60}
-                source={{html: transaksi.deskripsi}}
-                tagsStyles={{
-                  p: {color: colors.text || '#333', fontSize: 14},
-                }}
-              />
-              {transaksi.tipe == 'Digital' && transaksi.status == 'Selesai' && (
-                <TouchableOpacity
-                  onPress={() => Linking.openURL(transaksi.link_buku)}
-                  style={styles.ratingContainer}>
-                  <Text
-                    style={{
-                      ...styles.bookType,
-                      textAlign: 'center',
-                    }}>
-                    Download Buku Digital
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-
-        {/* Transaction Details */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Detail Pembelian</Text>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Harga Satuan</Text>
-            <Text style={styles.value}>{formatCurrency(transaksi.harga)}</Text>
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Jumlah</Text>
-            <Text style={styles.value}>{transaksi.jumlah} buah</Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.row}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>
-              {formatCurrency(transaksi.total)}
-            </Text>
-          </View>
-        </View>
+        {/* Purchase Details */}
+        {renderPurchaseDetails()}
 
         {/* Customer Information */}
         <View style={styles.card}>
@@ -202,10 +393,12 @@ export default function DetailTransaksi({route, navigation}) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Informasi Pembayaran</Text>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Metode Pembayaran</Text>
-            <Text style={styles.value}>{transaksi.pembayaran}</Text>
-          </View>
+          {transaksi.pembayaran && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Metode Pembayaran</Text>
+              <Text style={styles.value}>{transaksi.pembayaran}</Text>
+            </View>
+          )}
 
           {transaksi.bukti_transaksi && (
             <View style={styles.proofContainer}>
@@ -228,10 +421,12 @@ export default function DetailTransaksi({route, navigation}) {
             </View>
           )}
 
-          <View style={styles.noteContainer}>
-            <Text style={styles.label}>Catatan</Text>
-            <Text style={styles.noteText}>{transaksi.catatan}</Text>
-          </View>
+          {transaksi.catatan && (
+            <View style={styles.noteContainer}>
+              <Text style={styles.label}>Catatan</Text>
+              <Text style={styles.noteText}>{transaksi.catatan}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -296,6 +491,16 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontFamily: fonts?.primary?.[500] || 'System',
   },
+  typeBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  typeBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -306,6 +511,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  // Book specific styles
   bookInfo: {
     flexDirection: 'row',
     marginBottom: 16,
@@ -368,6 +574,50 @@ const styles = StyleSheet.create({
     color: colors.text || '#333',
     marginBottom: 8,
   },
+  ratingContainer: {
+    backgroundColor: colors.primary || '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  // Package specific styles
+  packageInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  packageIcon: {
+    alignItems: 'center',
+    marginRight: 16,
+    paddingTop: 8,
+  },
+  packageDetails: {
+    flex: 1,
+  },
+  packageTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text || '#333',
+    marginBottom: 8,
+    fontFamily: fonts?.primary?.[600] || 'System',
+  },
+  packageDescription: {
+    fontSize: 14,
+    color: colors.secondary || '#666',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  packageFeature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  featureText: {
+    fontSize: 14,
+    color: colors.text || '#333',
+    marginLeft: 8,
+    fontFamily: fonts?.primary?.[400] || 'System',
+  },
+  // Common styles
   divider: {
     height: 1,
     backgroundColor: colors.border || '#e0e0e0',
