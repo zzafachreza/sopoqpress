@@ -136,7 +136,7 @@ export default function RiwayatTransaksi({navigation}) {
           tanggal: item.tanggal,
           total: item.total,
           judul: `Paket Kolaborasi\nPenulis ke-${item.penulis}\n${item.nama_judul}`,
-
+          jumlah: 1,
           harga: item.total,
         });
       });
