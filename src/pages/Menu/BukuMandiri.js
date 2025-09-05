@@ -10,7 +10,7 @@ import {
   Linking,
   Clipboard,
 } from 'react-native';
-import {colors, fonts} from '../../utils';
+import {Color, colors, fonts} from '../../utils';
 import {MyButton, MyHeader, MyInput, MyRadio} from '../../components';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
@@ -19,20 +19,25 @@ import FastImage from 'react-native-fast-image';
 import {apiURL, getData, webURL} from '../../utils/localStorage';
 import axios from 'axios';
 import {useToast} from 'react-native-toast-notifications';
+import {Switch} from 'react-native-elements';
 
-export default function Checkout({navigation, route}) {
-  const {product} = route.params;
+export default function BukuMandiri({navigation, route}) {
+  const product = {
+    judul: 'Paket Mandiri/Tunggal',
+    harga: 3000000,
+  };
   const [user, setUser] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [selectedPayment, setSelectedPayment] = useState('bank');
   const [selectedBank, setSelectedBank] = useState('BRI');
   const [paymentProof, setPaymentProof] = useState(null);
   const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [haki, setHaki] = useState(false);
   const [orderNumber] = useState(
     `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
   );
 
-  const totalPrice = product.harga * quantity;
+  const [totalPrice, setTotalPrice] = useState(product.harga);
 
   useEffect(() => {
     getData('user').then(u => setUser(u));
@@ -43,15 +48,15 @@ export default function Checkout({navigation, route}) {
   const saveTransactionToStorage = async () => {
     try {
       let kirim = {
-        fid_buku: product.id_buku,
-        jumlah: quantity,
+        jenis: 'Mandiri',
+        haki: haki ? 'Ya' : 'Tidak',
         total: totalPrice,
         pembayaran: selectedBank,
         fid_customer: user.id_customer,
         bukti_transaksi: paymentProof,
       };
 
-      axios.post(apiURL + 'insert_transaksi', kirim).then(res => {
+      axios.post(apiURL + 'insert_transaksi2', kirim).then(res => {
         console.log(res.data);
         if (res.data.status == 200) {
           toast.show(res.data.message, {
@@ -132,8 +137,10 @@ export default function Checkout({navigation, route}) {
             Pembayaran Sedang Diverifikasi
           </Text>
           <View style={styles.summaryContainer}>
-            <Text style={styles.summaryText}>Produk: {product.judul}</Text>
-            <Text style={styles.summaryText}>Jumlah: {quantity}</Text>
+            <Text style={styles.summaryText}>Pesanan: {product.judul}</Text>
+            <Text style={styles.summaryText}>
+              + Haki: {haki ? 'Ya' : 'Tidak'}
+            </Text>
             <Text style={styles.summaryText}>
               Total: Rp {totalPrice.toLocaleString()}
             </Text>
@@ -152,33 +159,40 @@ export default function Checkout({navigation, route}) {
 
   return (
     <View style={styles.container}>
-      <MyHeader title="Checkout" onPress={() => navigation.goBack()} />
+      <MyHeader
+        title="Paket Mandiri/Tunggal"
+        onPress={() => navigation.goBack()}
+      />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Ringkasan Pesanan */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ringkasan Pesanan</Text>
           <View style={styles.productContainer}>
-            <FastImage
-              source={{
-                uri: webURL + product.cover,
-              }}
-              style={styles.productImage}
-              resizeMode="contain"
-            />
             <View style={styles.productInfo}>
-              <Text style={styles.productName}>{product.judul}</Text>
+              <Text style={styles.productName}>Paket Mandiri/Tunggal</Text>
               <Text style={styles.productPrice}>
                 Rp {new Intl.NumberFormat().format(product.harga)}
               </Text>
               <View style={styles.quantityContainer}>
-                <TouchableOpacity
-                  onPress={() => setQuantity(Math.max(1, quantity - 1))}>
-                  <Icon name="remove-circle" size={24} color={colors.primary} />
-                </TouchableOpacity>
-                <Text style={styles.quantityText}>{quantity}</Text>
-                <TouchableOpacity onPress={() => setQuantity(quantity + 1)}>
-                  <Icon name="add-circle" size={24} color={colors.primary} />
-                </TouchableOpacity>
+                <Text
+                  style={{
+                    ...fonts.subheadline3,
+                  }}>
+                  Pakai Haki + (Rp 1.000.000)
+                </Text>
+                <Switch
+                  color={colors.primary}
+                  trackColor={Color.blueGray[300]}
+                  value={haki}
+                  onChange={x => {
+                    setHaki(!haki);
+                    if (x.nativeEvent.value) {
+                      setTotalPrice(totalPrice + 1000000);
+                    } else {
+                      setTotalPrice(product.harga);
+                    }
+                  }}
+                />
               </View>
             </View>
           </View>

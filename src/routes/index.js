@@ -107,6 +107,10 @@ import {
   Buku,
   BukuDetail,
   ShowWeb,
+  Akses,
+  BukuKolaborasi,
+  BukuBundling,
+  BukuMandiri,
 } from '../pages';
 import {colors} from '../utils';
 import {Icon} from 'react-native-elements';
@@ -124,7 +128,7 @@ const MainApp = () => {
       tabBar={props => <BottomNavigator {...props} />}>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Artikel" component={Artikel} />
-      <Tab.Screen name="Buku" component={Buku} />
+      <Tab.Screen name="Akses" component={Akses} />
       <Tab.Screen name="RiwayatTransaksi" component={RiwayatTransaksi} />
       <Tab.Screen name="Profile" component={Account} />
     </Tab.Navigator>
@@ -145,6 +149,30 @@ export default function Router() {
       <Stack.Screen
         name="Pelanggan"
         component={Pelanggan}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="BukuKolaborasi"
+        component={BukuKolaborasi}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="BukuBundling"
+        component={BukuBundling}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="BukuMandiri"
+        component={BukuMandiri}
         options={{
           headerShown: false,
         }}

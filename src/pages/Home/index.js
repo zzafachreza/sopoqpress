@@ -13,12 +13,12 @@ import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
 import {useIsFocused} from '@react-navigation/native';
 import axios from 'axios';
-import {apiURL, webURL} from '../../utils/localStorage';
+import {apiURL, getData, webURL} from '../../utils/localStorage';
 
 const {width} = Dimensions.get('window');
 
 export default function Home({navigation}) {
-  const [user] = useState({});
+  const [user, setUser] = useState({});
   const [featuredProducts, setProduct] = useState([]);
 
   const navigateToDetail = product => {
@@ -46,6 +46,10 @@ export default function Home({navigation}) {
 
   const isFocused = useIsFocused();
   useEffect(() => {
+    getData('user').then(u => {
+      setUser(u);
+      console.log(u);
+    });
     if (isFocused) {
       getBuku();
     }
@@ -53,24 +57,22 @@ export default function Home({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={[colors.primary, '#FEFAE0']}
-        style={styles.headerGradient}
-        start={{x: 0, y: 0}}
-        end={{x: 0.9, y: 1}}>
+      <View style={styles.headerGradient}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greetingText}>SELAMAT DATANG,</Text>
-            <Text style={styles.greetingText}>TOKO BUKU SOPOQ</Text>
+            <Text style={styles.greetingText}>Halo, {user.nama_customer}</Text>
           </View>
-          <FastImage
-            source={require('../../assets/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
         </View>
-      </LinearGradient>
-
+      </View>
+      <FastImage
+        resizeMode={FastImage.resizeMode.contain}
+        source={require('../../assets/logo.png')}
+        style={{
+          alignSelf: 'center',
+          width: 200,
+          height: 50,
+        }}
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
@@ -136,8 +138,9 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     paddingBottom: 10,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    backgroundColor: colors.primary,
+    // borderBottomLeftRadius: 30,
+    // borderBottomRightRadius: 30,
   },
   header: {
     flexDirection: 'row',
@@ -149,14 +152,14 @@ const styles = StyleSheet.create({
     top: 10,
   },
   logo: {
-    width: 50,
+    width: 100,
     height: 50,
     borderRadius: 10,
   },
   greetingText: {
     fontFamily: fonts.secondary[600],
-    fontSize: 15,
-    color: colors.secondary,
+    fontSize: 13,
+    color: colors.white,
   },
   scrollContainer: {
     paddingBottom: 30,

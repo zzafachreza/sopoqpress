@@ -75,24 +75,31 @@ export default function BottomNavigator({state, descriptors, navigation}) {
         };
 
         let iconName;
+        let iconText;
         switch (label) {
           case 'Home':
             iconName = isFocused ? 'home' : 'home-outline';
+            iconText = 'Beranda';
             break;
           case 'Artikel':
             iconName = isFocused ? 'newspaper' : 'newspaper-outline';
+            iconText = 'Berita';
             break;
           case 'RiwayatTransaksi':
             iconName = isFocused ? 'file-tray-full' : 'file-tray-full-outline';
+            iconText = 'Riwayat';
             break;
           case 'Profile':
             iconName = isFocused ? 'person' : 'person-outline';
+            iconText = 'Profil';
             break;
-          case 'Buku':
+          case 'Akses':
             iconName = isFocused ? 'book' : 'book-outline';
+            iconText = 'Publikasi';
             break;
           default:
             iconName = 'book-outline';
+            iconText = 'Home';
             break;
         }
 
@@ -120,6 +127,14 @@ export default function BottomNavigator({state, descriptors, navigation}) {
                 size={24}
                 color={isFocused ? colors.white : colors.white}
               />
+              <Text
+                style={{
+                  fontFamily: fonts.secondary[600],
+                  fontSize: 9,
+                  color: colors.white,
+                }}>
+                {iconText}
+              </Text>
             </View>
           </TouchableOpacity>
         );

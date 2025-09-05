@@ -56,11 +56,12 @@ export default function Login({navigation, route}) {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <Image
+        <FastImage
+          resizeMode={FastImage.resizeMode.contain}
           source={require('../../assets/logo.png')}
           style={{
-            width: 200,
-            height: 200,
+            width: windowWidth / 1.1,
+            height: 100,
           }}
         />
       </View>

@@ -27,7 +27,6 @@ export default function DetailArtikel({route}) {
               marginBottom: 20,
             }}
           />
-
           <Text
             style={{
               fontFamily: fonts.primary[600],

@@ -61,8 +61,8 @@ export default function Splash({navigation}) {
         resizeMode="contain"
         style={{
           transform: [{scale: img}],
-          width: windowWidth / 1.2,
-          height: windowWidth / 1.2,
+          width: windowWidth / 1,
+          height: windowWidth / 1,
         }}
       />
 

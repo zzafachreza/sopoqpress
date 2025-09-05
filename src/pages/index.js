@@ -53,11 +53,19 @@ import DetailTransaksi from './RiwayatTransaksi/detialtransaksi';
 import Buku from './Buku/Buku';
 import BukuDetail from './Buku/BukuDetail';
 import ShowWeb from './Menu/ShowWeb';
+import Akses from './Menu/Akses';
+import BukuKolaborasi from './Menu/BukuKolaborasi';
+import BukuBundling from './Menu/BukuBundling';
+import BukuMandiri from './Menu/BukuMandiri';
 
 // NEW
 
 export {
   Splash,
+  BukuKolaborasi,
+  BukuBundling,
+  BukuMandiri,
+  Akses,
   Profit,
   ShowWeb,
   Buku,
